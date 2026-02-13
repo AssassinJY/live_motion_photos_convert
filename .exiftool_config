@@ -1,0 +1,60 @@
+%Image::ExifTool::UserDefined::ContainerItem = (
+    NAMESPACE => { 'Item' => 'http://ns.google.com/photos/1.0/container/item/' },
+    WRITABLE => 'string',
+    Mime     => { },
+    Semantic => { },
+    Length   => { Writable => 'integer' },
+    Padding  => { Writable => 'integer' },
+);
+
+%Image::ExifTool::UserDefined::Container = (
+    GROUPS => { 0 => 'XMP', 1 => 'XMP-Container', 2 => 'Image' },
+    NAMESPACE => { 'Container' => 'http://ns.google.com/photos/1.0/container/' },
+    WRITABLE => 'string',
+    Directory => { List => 'Seq', Struct => 'Image::ExifTool::UserDefined::ContainerItem' },
+);
+
+%Image::ExifTool::UserDefined::GCamera = (
+    GROUPS => { 0 => 'XMP', 1 => 'XMP-GCamera', 2 => 'Image' },
+    NAMESPACE => { 'GCamera' => 'http://ns.google.com/photos/1.0/camera/' },
+    WRITABLE => 'string',
+    
+    MicroVideo => { Writable => 'integer' },
+    MicroVideoVersion => { Writable => 'integer' },
+    MicroVideoOffset => { Writable => 'integer' },
+    MicroVideoPresentationTimestampUs => { Writable => 'integer' },
+    MotionPhoto => { Writable => 'integer' },
+    MotionPhotoVersion => { Writable => 'integer' },
+    MotionPhotoPresentationTimestampUs => { Writable => 'integer' },
+);
+
+%Image::ExifTool::UserDefined = (
+    'Image::ExifTool::Exif::Main' => {
+        0x8897 => {
+            Name => 'MicroVideo',
+            Writable => 'int8u',
+        },
+        0x889f => {
+            Name => 'XiaomiMicroVideo',
+            Writable => 'int8u',
+        },
+        0x9a01 => {
+            Name => 'EmbeddedVideo',
+            Writable => 'int8u',
+        },
+    },
+    'Image::ExifTool::XMP::Main' => {
+        GCamera => {
+            SubDirectory => {
+                TagTable => 'Image::ExifTool::UserDefined::GCamera',
+            },
+        },
+        Container => {
+            SubDirectory => {
+                TagTable => 'Image::ExifTool::UserDefined::Container',
+            },
+        },
+    },
+);
+
+1;
