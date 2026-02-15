@@ -1,7 +1,14 @@
 
 import os
 import logging
-from utils import convert_heic_to_jpg, convert_mov_to_mp4, inject_motion_photo_metadata, get_file_size
+from utils import (
+    convert_heic_to_jpg,
+    convert_mov_to_mp4,
+    inject_motion_photo_metadata,
+    get_file_size,
+    get_cover_timestamp_us_from_image_metadata,
+    get_apple_live_photo_presentation_timestamp_us,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -25,6 +32,14 @@ def create_motion_photo(image_path, mov_path, output_jpg_path):
         # 2. Convert Video
         logger.info(f"Converting Video: {mov_path}")
         convert_mov_to_mp4(mov_path, temp_mp4)
+
+        # 2.1 Read Apple still-image timestamp and map to Motion Photo presentation timestamp.
+        cover_ts_us = get_apple_live_photo_presentation_timestamp_us(mov_path)
+        if cover_ts_us is None:
+            cover_ts_us = get_cover_timestamp_us_from_image_metadata(image_path)
+        if cover_ts_us is None:
+            cover_ts_us = 0
+        logger.info(f"Cover timestamp (us): {cover_ts_us}")
         
         # 3. Get Video Size
         video_size = get_file_size(temp_mp4)
@@ -32,7 +47,7 @@ def create_motion_photo(image_path, mov_path, output_jpg_path):
         # 4. Inject Metadata into JPG *before* appending
         # This is safer as it ensures exiftool doesn't mess with appended binary data.
         logger.info(f"Injecting Metadata (Offset={video_size})")
-        inject_motion_photo_metadata(temp_jpg, video_size)
+        inject_motion_photo_metadata(temp_jpg, video_size, presentation_timestamp_us=cover_ts_us)
         
         # 5. Combine JPG and MP4
         logger.info("Combining JPG and MP4")
@@ -51,5 +66,3 @@ def create_motion_photo(image_path, mov_path, output_jpg_path):
         # Cleanup
         if os.path.exists(temp_jpg): os.remove(temp_jpg)
         if os.path.exists(temp_mp4): os.remove(temp_mp4)
-
-
