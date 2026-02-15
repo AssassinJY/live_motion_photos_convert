@@ -88,6 +88,26 @@ def _find_hdr_gainmap_file(temp_dir, base_stem):
     return str(matches[0]) if matches else None
 
 
+def _ensure_gainmap_has_icc(base_jpg_path, gainmap_path):
+    """
+    Some Apple HEIC gainmaps are missing ICC profile after decode via heif-convert.
+    ultrahdr_app may reject such gainmaps, so copy ICC from base image when needed.
+    """
+    icc_values = _read_exiftool_values(gainmap_path, ['-ICC_Profile:ProfileDescription'])
+    if icc_values:
+        return
+    run_command(
+        [
+            'exiftool',
+            '-overwrite_original',
+            '-TagsFromFile', base_jpg_path,
+            '-icc_profile',
+            gainmap_path,
+        ],
+        check=False,
+    )
+
+
 def _convert_heic_to_ultrahdr_jpg(input_path, output_path):
     if not (_tool_exists('heif-convert') and _tool_exists('ultrahdr_app') and _tool_exists('exiftool')):
         return False
@@ -103,6 +123,7 @@ def _convert_heic_to_ultrahdr_jpg(input_path, output_path):
         gainmap_path = _find_hdr_gainmap_file(temp_dir, base_stem)
         if not gainmap_path:
             raise RuntimeError('HDR gain map auxiliary image not found after HEIC decode.')
+        _ensure_gainmap_has_icc(str(base_jpg), gainmap_path)
 
         cfg_path.write_text(
             '\n'.join(
