@@ -1,8 +1,12 @@
 # Live motion photos convert
 
+[English](README_en.md)
+
 实现 Apple Live Photo （实况照片） 和 Android Motion Photo （动态照片）的双向转换，且保持动态视频可播放。
 
-本项目是在本人 Apple 和 小米 双持的背景下，为解决两边实况图互转而产生的。其实可以借用百度网盘、抖音、小红书、微信实现实况图跨设备互转。但是要么下载太慢，要么有损失，最重要的是无法批量。Github 上没找到完全满足需求的工具，故自己写了一个，想实现批量互转。(注意：Vibe Coding 项目，无人工代码评审)
+## 背景
+
+在本人 Apple 和 小米 双持的背景下，为解决两边实况图互转而产生的项目。其实可以借用百度网盘、抖音、小红书、微信实现实况图跨设备互转。但是要么下载太慢，要么有损失，最重要的是无法批量。Github 上没找到完全满足需求的工具，故自己写了一个，想实现批量互转。(注意：Vibe Coding 项目，无人工代码评审)
 
 仅在以下环境测通：
 
@@ -23,20 +27,24 @@
 
 ## Mac 下安装和运行
 
-    # clone repo
-    cd live_motion_photos_convert
-    brew install ffmpeg exiftool imagemagick
+```bash
+# clone repo
+cd live_motion_photos_convert
+brew install ffmpeg exiftool imagemagick libheif libultrahdr
+```
 
 运行：
 
-    # 动态 jpg 转 HEIC+mov (-o 指定 HEIC 路径即可， mov 会自动在同目录生成):
-    python3 main.py -i input.jpg -o output.HEIC
+```bash
+# 动态 jpg 转 HEIC+mov (-o 指定 HEIC 路径即可， mov 会自动在同目录生成):
+python3 main.py -i input.jpg -o output.HEIC
 
-    # HEIC+mov 转 动态 jpg (确保同目录下同名 .mov 文件存在):
-    python3 main.py -i input.HEIC -o output.jpg
+# HEIC+mov 转 动态 jpg (确保同目录下同名 .mov 文件存在):
+python3 main.py -i input.HEIC -o output.jpg
 
-    # livp 转 jpg:
-    python3 main.py -i input.livp -o output.jpg
+# livp 转 jpg:
+python3 main.py -i input.livp -o output.jpg
+```
 
 **参数：**
 
@@ -48,14 +56,16 @@
 
 **示例：**
 
-    # 将某目录下所有 .livp 转为 JPG，输出到该目录下的 jpg 子目录
-    python3 batch.py -t livp -i /path/to/photos
+```bash
+# 将某目录下所有 .livp 转为 JPG，输出到该目录下的 jpg 子目录
+python3 batch.py -t livp -i /path/to/photos
 
-    # 将某目录下所有 .heic+.mov 转为 JPG，输出到指定目录
-    python3 batch.py -t heic -i /path/to/live_photos -o /path/to/output_jpg
+# 将某目录下所有 .heic+.mov 转为 JPG，输出到指定目录
+python3 batch.py -t heic -i /path/to/live_photos -o /path/to/output_jpg
 
-    # 将某目录下所有 Motion Photo JPG 转为 HEIC+MOV，输出到该目录下的 heic 子目录
-    python3 batch.py -t jpg -i /path/to/motion_jpgs
+# 将某目录下所有 Motion Photo JPG 转为 HEIC+MOV，输出到该目录下的 heic 子目录
+python3 batch.py -t jpg -i /path/to/motion_jpgs
+```
 
 **参数：**
 
@@ -110,7 +120,7 @@ flowchart TD
 
 MakerNotes 是 Apple 的私有标准没查到资料，因此这里借用了微信的实况图，其图的 MakerNotes 相对干净，从中提取了 MakerNotes 保存下来复用。
 
-## 封面帧说明：
+## 封面帧说明
 
 - macOS：JPG（Motion Photo）→ HEIC+MOV 时会优先使用 AVFoundation 写入 Apple 的 still-image-time timed metadata，导入照片 app 后可在编辑中识别封面帧。
 - 非 macOS 或 AVFoundation 不可用：自动回退 ffmpeg 路径，通常仍可识别为实况并播放，但不保证“编辑封面帧”可用。
