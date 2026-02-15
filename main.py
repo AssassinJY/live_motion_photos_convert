@@ -12,10 +12,12 @@ from utils import (
     extract_livp,
     split_motion_photo_jpg,
     get_motion_photo_video_size,
+    get_motion_photo_presentation_timestamp_us,
     convert_jpg_to_heic,
     convert_mp4_to_mov,
     inject_heic_makernotes_from_file,
     set_heic_content_identifier,
+    set_heic_live_photo_video_index,
     set_mov_content_identifier,
 )
 
@@ -53,6 +55,8 @@ def jpg_motion_to_heic_mov(jpg_path, output_heic_path=None):
 
     content_uuid = str(uuid.uuid4()).upper()
     logger.info("Content Identifier (HEIC+MOV): %s", content_uuid)
+    cover_ts_us = get_motion_photo_presentation_timestamp_us(jpg_path)
+    logger.info("Motion Photo cover timestamp (us): %s", cover_ts_us if cover_ts_us is not None else "N/A")
 
     temp_dir = tempfile.mkdtemp(prefix="motion_photo_")
     try:
@@ -67,8 +71,10 @@ def jpg_motion_to_heic_mov(jpg_path, output_heic_path=None):
         else:
             logger.warning("MakerNotes binary not found: %s", MAKERNOTES_BIN)
 
-        convert_mp4_to_mov(embedded_mp4, mov_path)
+        convert_mp4_to_mov(embedded_mp4, mov_path, presentation_timestamp_us=cover_ts_us, content_uuid=content_uuid)
         set_heic_content_identifier(heic_path, content_uuid)
+        if cover_ts_us is not None:
+            set_heic_live_photo_video_index(heic_path, cover_ts_us)
         set_mov_content_identifier(mov_path, content_uuid)
         return heic_path, mov_path
     finally:

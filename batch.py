@@ -2,7 +2,7 @@
 """
 批量转换脚本：对指定目录中的文件按类型集中转换。
 - livp: livp → jpg（.livp → Motion Photo JPG）
-- heic: heic → jpg（.heic+.mov → Motion Photo JPG）
+- heic: heic → jpg（.heic+.mov → Motion Photo JPG，HDR HEIC 会尽量转为 Ultra HDR JPG）
 - jpg:  jpg → heic（Motion Photo JPG → HEIC + MOV）
 """
 import os
@@ -19,6 +19,18 @@ from main import jpg_motion_to_heic_mov
 
 logging.basicConfig(level=logging.WARNING, format="%(levelname)s: %(message)s")
 logger = logging.getLogger(__name__)
+
+
+def has_ultrahdr_toolchain():
+    """
+    判断是否具备 HEIC HDR -> Ultra HDR JPG 所需工具链。
+    不影响主流程：缺失时会自动走 SDR 回退路径。
+    """
+    return (
+        shutil.which("heif-convert") is not None
+        and shutil.which("ultrahdr_app") is not None
+        and shutil.which("exiftool") is not None
+    )
 
 
 def collect_livp_files(input_dir):
@@ -176,6 +188,13 @@ def main():
     if not output_dir:
         output_dir = os.path.join(input_dir, output_format_dir)
     output_dir = os.path.abspath(output_dir)
+
+    # 仅提示，不改变现有批处理行为。
+    if args.type in ("livp", "heic"):
+        if has_ultrahdr_toolchain():
+            print("HDR 支持: 已检测到 Ultra HDR 工具链，HDR HEIC 将尝试输出 Ultra HDR JPG。")
+        else:
+            print("HDR 支持: 未检测到完整 Ultra HDR 工具链，将使用 SDR 路径（不影响视频嵌入）。")
 
     if args.type == "livp":
         ok, failed = convert_batch_livp(input_dir, output_dir)

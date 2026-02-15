@@ -65,7 +65,7 @@ flowchart TD
 
     # clone repo
     cd live_motion_photos_convert
-    brew install ffmpeg exiftool imagemagick
+    brew install ffmpeg exiftool imagemagick libheif libultrahdr
 
 运行：
 
@@ -109,9 +109,14 @@ flowchart TD
 
 MakerNotes 是 Apple 的私有标准没查到资料，因此这里借用了微信的实况图，其图的 MakerNotes 相对干净，从中提取了 MakerNotes 保存下来复用。
 
+## 封面帧说明：
+
+- macOS：JPG（Motion Photo）→ HEIC+MOV 时会优先使用 AVFoundation 写入 Apple 的 still-image-time timed metadata，导入照片 app 后可在编辑中识别封面帧。
+- 非 macOS 或 AVFoundation 不可用：自动回退 ffmpeg 路径，通常仍可识别为实况并播放，但不保证“编辑封面帧”可用。
+
 ## 核心工具库
 
-ffmpeg、exiftool、imagemagick
+ffmpeg、exiftool、imagemagick、libheif、libultrahdr、AVFoundation
 
 ## 参考项目
 
