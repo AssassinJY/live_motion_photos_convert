@@ -1,3 +1,5 @@
+
+
 # Live motion photos convert
 
 [English](README_en.md)
@@ -30,6 +32,7 @@
 ```bash
 # clone repo
 cd live_motion_photos_convert
+# 确保已安装 Python 3
 brew install ffmpeg exiftool imagemagick libheif libultrahdr
 ```
 
@@ -138,4 +141,3 @@ ffmpeg、exiftool、imagemagick、libheif、libultrahdr、AVFoundation
 ## License
 
 This project is licensed under the MIT License.
-
